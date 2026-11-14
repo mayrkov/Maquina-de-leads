@@ -65,49 +65,55 @@ export default function Videos({
                     description="Para vídeos gravados sem roteiro do sistema. Sem roteiro, a IA deduz tema, persona, gancho, chamada para ação e palavra-chave a partir do próprio vídeo, e você revisa no formulário de edição."
                 />
 
-                <Form
-                    {...store.form()}
-                    resetOnSuccess
-                    className="grid max-w-xl gap-6"
+                <div data-tour="upload-form">
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid max-w-xl gap-6"
+                    >
+                        {({ processing, errors, progress }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="video">
+                                        Vídeo bruto (MP4 ou MOV, até{' '}
+                                        {uploadMaxMb} MB)
+                                    </Label>
+                                    <Input
+                                        id="video"
+                                        name="video"
+                                        type="file"
+                                        accept="video/mp4,video/quicktime"
+                                        required
+                                    />
+                                    <InputError message={errors.video} />
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <Button type="submit" disabled={processing}>
+                                        {processing && <Spinner />}
+                                        Enviar
+                                    </Button>
+                                    {progress && (
+                                        <span className="text-sm text-muted-foreground">
+                                            {progress.percentage}% enviado
+                                        </span>
+                                    )}
+                                    {status && !processing && (
+                                        <span className="text-sm text-green-700 dark:text-green-400">
+                                            {status}
+                                        </span>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
+
+                <section
+                    aria-labelledby="envios"
+                    data-tour="upload-envios"
+                    className="grid gap-3"
                 >
-                    {({ processing, errors, progress }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="video">
-                                    Vídeo bruto (MP4 ou MOV, até {uploadMaxMb}{' '}
-                                    MB)
-                                </Label>
-                                <Input
-                                    id="video"
-                                    name="video"
-                                    type="file"
-                                    accept="video/mp4,video/quicktime"
-                                    required
-                                />
-                                <InputError message={errors.video} />
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <Button type="submit" disabled={processing}>
-                                    {processing && <Spinner />}
-                                    Enviar
-                                </Button>
-                                {progress && (
-                                    <span className="text-sm text-muted-foreground">
-                                        {progress.percentage}% enviado
-                                    </span>
-                                )}
-                                {status && !processing && (
-                                    <span className="text-sm text-green-700 dark:text-green-400">
-                                        {status}
-                                    </span>
-                                )}
-                            </div>
-                        </>
-                    )}
-                </Form>
-
-                <section aria-labelledby="envios" className="grid gap-3">
                     <h2 id="envios" className="text-lg font-semibold">
                         Envios
                     </h2>

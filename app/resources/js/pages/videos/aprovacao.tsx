@@ -142,7 +142,10 @@ export default function Aprovacao({
     return (
         <>
             <Head title={`Aprovação · ${video.titulo}`} />
-            <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8">
+            <div
+                data-tour="aprovacao-conteudo"
+                className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8"
+            >
                 {roteiro ? (
                     <SessaoRoteiro roteiro={roteiro} atual="aprovacao" />
                 ) : (
@@ -165,6 +168,7 @@ export default function Aprovacao({
                 <div className="flex flex-wrap items-start gap-8">
                     <section
                         aria-label="Vídeo editado"
+                        data-tour="aprovacao-video"
                         className="flex flex-[1_1_320px] flex-col items-start gap-3"
                     >
                         <div className="relative w-[320px] max-w-full">
@@ -212,13 +216,18 @@ export default function Aprovacao({
 
                     <section className="flex min-w-0 flex-[999_1_460px] flex-col gap-4">
                         {linkMedico && (
-                            <LinkMedico
-                                url={linkMedico}
-                                titulo={video.titulo}
-                            />
+                            <div data-tour="aprovacao-link">
+                                <LinkMedico
+                                    url={linkMedico}
+                                    titulo={video.titulo}
+                                />
+                            </div>
                         )}
 
-                        <div className="flex flex-col gap-3.5 rounded-xl border bg-card p-5">
+                        <div
+                            data-tour="aprovacao-etapas"
+                            className="flex flex-col gap-3.5 rounded-xl border bg-card p-5"
+                        >
                             <h2 className="text-base font-semibold">
                                 Etapas de aprovação
                             </h2>
@@ -300,7 +309,10 @@ export default function Aprovacao({
                         </div>
 
                         {decidivel && (
-                            <div className="flex flex-col gap-3 rounded-xl border bg-card p-5">
+                            <div
+                                data-tour="aprovacao-decisao"
+                                className="flex flex-col gap-3 rounded-xl border bg-card p-5"
+                            >
                                 <label
                                     htmlFor="ajuste"
                                     className="text-base font-semibold"

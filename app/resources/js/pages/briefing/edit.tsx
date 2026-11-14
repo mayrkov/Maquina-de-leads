@@ -96,29 +96,35 @@ export default function BriefingEdit({
                     sobretitulo="Preenchido pela produção com o médico"
                     titulo="Briefing do cliente"
                 >
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="h-11"
-                        disabled={processing}
-                        onClick={enviar(false)}
+                    <div
+                        data-tour="briefing-acoes"
+                        className="flex flex-wrap gap-3"
                     >
-                        Salvar rascunho
-                    </Button>
-                    <Button
-                        type="button"
-                        className="h-11"
-                        disabled={processing}
-                        onClick={enviar(true)}
-                    >
-                        {processing ? <Spinner /> : <Sparkles />}
-                        Salvar e sugerir personas
-                    </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11"
+                            disabled={processing}
+                            onClick={enviar(false)}
+                        >
+                            Salvar rascunho
+                        </Button>
+                        <Button
+                            type="button"
+                            className="h-11"
+                            disabled={processing}
+                            onClick={enviar(true)}
+                        >
+                            {processing ? <Spinner /> : <Sparkles />}
+                            Salvar e sugerir personas
+                        </Button>
+                    </div>
                 </CabecalhoPagina>
 
                 <div className="flex flex-wrap items-start gap-6">
                     <form
                         onSubmit={enviar(false)}
+                        data-tour="briefing-form"
                         className="grid min-w-0 flex-[999_1_520px] grid-cols-1 gap-5 rounded-xl border bg-card p-7 md:grid-cols-2"
                     >
                         {campo(

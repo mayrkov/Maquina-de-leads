@@ -133,6 +133,23 @@ Formato: **o que foi decidido**, **por quê**, e **o que fica em aberto** quando
 - **Menu:** grupo "Resultados" (Publicação, Leads, Métricas) e "Edição" e "Aprovação" em Produção, como no canva. "Upload avulso" só fica marcado na própria tela.
 - **Painel:** a semana passou a ser a dos roteiros (segunda a domingo). Antes usava o `startOfWeek()` do Carbon, que no pt_BR começa no domingo, e contava 0 roteiros.
 
+### 2026-11-14 · Tour guiado e guia do sistema
+
+- **A produção aprende o sistema por um tour na própria tela e por um guia permanente em `/guia`.**
+  - Por quê: o fluxo tem muitas etapas e números com significado próprio (status do vídeo, etapas da edição, leads, métricas). Um texto de ajuda separado envelhece; o tour destaca o elemento real e o guia é a consulta de depois.
+  - O tour realça elementos com `data-tour`, sem capturas de tela: mudar o layout não deixa a imagem desatualizada.
+  - As entradas são: tour completo (25 passos), tour essencial (10), tour da tela atual (pelo "?" no cabeçalho) e o guia. O menu do usuário e o rodapé da barra lateral também levam ao guia e ao tour.
+- **O primeiro acesso abre o tour completo sozinho no Painel.** A marca fica em `users.tour_concluido_em`.
+  - Fechar ou concluir grava a marca: o tour não reabre sozinho, mas continua no "?" e no guia. O progresso do passo fica em `sessionStorage`, então recarregar a página no meio não recomeça.
+  - A marca é por usuário, não por cliente: cada pessoa da produção vê o tour no seu primeiro acesso.
+- **O tour por tela é escolhido pelo componente do Inertia.** `videos/fila` serve Edição e Aprovação; o tour certo vem do `titulo` da página. Sem isso, as duas telas caíam no mesmo tour.
+- **A tela de confirmação do médico não tem tour nem menu:** ela não usa o layout do app e não é para a produção.
+- **O cartão “Leads qualificados” da tela de Métricas conta todos os leads registrados, não só os com status `qualificado`.** O rótulo foi mantido e o tour/guia explicam o que o número inclui.
+  - Por quê: mudar o rótulo é decisão de produto, não de implementação. Fica em aberto renomear para "Leads registrados" ou passar a contar só o status `qualificado`; as duas mudanças mexem no que a produção entende por resultado.
+  - O cartão “Leads novos (manual)” do Painel conta só os `qualificado`, que é o que ainda espera entrega à equipe. São números diferentes com nomes parecidos; o guia explica os dois.
+- **O guia e o tour dizem o que ainda é manual no MVP** (publicação, métricas digitadas, entrega do lead) e que as regras do conselho são provisórias.
+  - Por quê: a produção não pode procurar no sistema um botão que não existe. As pendências estão em `planejamento/requisitos/pendencias.md`.
+
 ## Peculiaridades do ambiente local
 
 ### O worker de mídia e IA não roda pelo lerd

@@ -31,6 +31,7 @@ O Laravel e o worker conversam só pela tabela `tarefas_midia` no PostgreSQL: o 
 - Formulário de edição: a IA transcreve o vídeo e sugere tema, persona, gancho, trechos a cortar, palavras de destaque na legenda, chamada, palavra-chave e legenda do post (partindo do roteiro, quando há). A produção mantém, altera ou remove cada campo, e a edição segue o formulário.
 - Aprovação: a produção aprova, pede ajuste ou descarta; o médico confirma pelo celular, sem login, por um link de 7 dias. A aprovação vale só para aquele vídeo e aquela legenda.
 - Publicação manual (link do post), registro de leads com consentimento e vídeo de origem, e métricas digitadas por vídeo, persona e gancho.
+- Tour guiado (completo, essencial e por tela) e guia do sistema em `/guia`: explicam o fluxo, os status, o que ainda é manual e o que cada métrica quer dizer. O primeiro acesso abre o tour sozinho; depois ele fica no “?” do cabeçalho e no menu do usuário.
 - Edição automática no worker: transcrição (faster-whisper), corte de pausas, gaguejos e repetições, reenquadramento 9:16 seguindo o rosto, legenda e tela final com a palavra-chave. Uma nova tentativa retoma de onde a anterior parou.
 - Download do vídeo editado, só para usuários do mesmo cliente.
 

@@ -34,6 +34,7 @@ function Pronto({ video }: { video: Video }) {
     return (
         <section
             aria-labelledby="pronto"
+            data-tour="publicacao-checklist"
             className="flex min-w-0 flex-[999_1_520px] flex-col gap-4 rounded-xl border bg-card p-[22px]"
         >
             <div className="flex flex-wrap items-center gap-4">
@@ -142,37 +143,42 @@ function Pronto({ video }: { video: Video }) {
                     </label>
                 </li>
             </ol>
-            <Form {...publicar.form(video.id)} className="flex flex-col gap-4">
-                {({ processing, errors }) => (
-                    <>
-                        <div className="flex flex-col gap-1.5">
-                            <label
-                                htmlFor="link"
-                                className="text-sm font-semibold"
+            <div data-tour="publicacao-link">
+                <Form
+                    {...publicar.form(video.id)}
+                    className="flex flex-col gap-4"
+                >
+                    {({ processing, errors }) => (
+                        <>
+                            <div className="flex flex-col gap-1.5">
+                                <label
+                                    htmlFor="link"
+                                    className="text-sm font-semibold"
+                                >
+                                    Link do post publicado
+                                </label>
+                                <input
+                                    id="link"
+                                    name="post_url"
+                                    type="url"
+                                    required
+                                    placeholder="https://www.instagram.com/reel/…"
+                                    className="min-h-11 rounded-[10px] border border-input bg-card px-3.5 text-[15px]"
+                                />
+                                <InputError message={errors.post_url} />
+                            </div>
+                            <Button
+                                type="submit"
+                                className="h-11 self-start"
+                                disabled={processing || !video.aprovacao_valida}
                             >
-                                Link do post publicado
-                            </label>
-                            <input
-                                id="link"
-                                name="post_url"
-                                type="url"
-                                required
-                                placeholder="https://www.instagram.com/reel/…"
-                                className="min-h-11 rounded-[10px] border border-input bg-card px-3.5 text-[15px]"
-                            />
-                            <InputError message={errors.post_url} />
-                        </div>
-                        <Button
-                            type="submit"
-                            className="h-11 self-start"
-                            disabled={processing || !video.aprovacao_valida}
-                        >
-                            {processing && <Spinner />}
-                            Marcar como publicado
-                        </Button>
-                    </>
-                )}
-            </Form>
+                                {processing && <Spinner />}
+                                Marcar como publicado
+                            </Button>
+                        </>
+                    )}
+                </Form>
+            </div>
         </section>
     );
 }
@@ -217,7 +223,10 @@ export default function Publicacao({
                     </nav>
                 )}
 
-                <div className="flex flex-wrap items-start gap-6">
+                <div
+                    data-tour="publicacao-conteudo"
+                    className="flex flex-wrap items-start gap-6"
+                >
                     {video ? (
                         <Pronto key={video.id} video={video} />
                     ) : (

@@ -1,5 +1,7 @@
 <?php
 
+use App\Domains\Ajuda\Controllers\GuiaController;
+use App\Domains\Ajuda\Controllers\TourController;
 use App\Domains\Clientes\Controllers\BriefingController;
 use App\Domains\Leads\Controllers\LeadController;
 use App\Domains\Marca\Controllers\KitMarcaController;
@@ -74,6 +76,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('leads', [LeadController::class, 'index'])->name('leads.index');
     Route::post('leads', [LeadController::class, 'store'])->name('leads.store');
     Route::put('leads/{lead}', [LeadController::class, 'update'])->whereNumber('lead')->name('leads.update');
+
+    // Ajuda: o guia é a referência permanente; o POST só registra que o onboarding já foi visto.
+    Route::get('guia', GuiaController::class)->name('guia');
+    Route::post('tour/concluido', [TourController::class, 'concluir'])->name('tour.concluido');
 });
 
 // Confirmação do médico pelo celular (canva, tela 11): sem login, só com o link que a produção mandou.

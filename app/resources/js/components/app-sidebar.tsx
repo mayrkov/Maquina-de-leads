@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
+    BookOpen,
     CheckCircle2,
     Clapperboard,
     FileText,
@@ -24,7 +25,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, guia } from '@/routes';
 import { edit as briefing } from '@/routes/briefing';
 import { edit as kit } from '@/routes/kit';
 import { index as personas } from '@/routes/personas';
@@ -92,13 +93,26 @@ export function AppSidebar() {
                 )}
             </SidebarHeader>
 
-            <SidebarContent className="gap-4 pt-2">
+            <SidebarContent className="gap-4 pt-2" data-tour="menu">
                 <NavMain label="Configuração" items={configuracao} />
                 <NavMain label="Produção" items={producao} />
                 <NavMain label="Resultados" items={resultados} />
             </SidebarContent>
 
             <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            asChild
+                            tooltip={{ children: 'Guia do sistema' }}
+                        >
+                            <Link href={guia()} prefetch>
+                                <BookOpen />
+                                <span>Guia do sistema</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

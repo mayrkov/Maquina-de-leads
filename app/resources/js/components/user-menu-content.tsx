@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { BookOpen, Compass, LogOut, Settings } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,8 +8,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
+import { guia, logout } from '@/routes';
 import { edit } from '@/routes/profile';
+import { TOUR_COMPLETO } from '@/tour/passos';
+import { useTour } from '@/tour/tour-context';
 import type { User } from '@/types';
 
 type Props = {
@@ -18,6 +20,7 @@ type Props = {
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
+    const { iniciar } = useTour();
 
     const handleLogout = () => {
         cleanup();
@@ -43,6 +46,24 @@ export function UserMenuContent({ user }: Props) {
                         <Settings className="mr-2" />
                         Settings
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full cursor-pointer"
+                        href={guia()}
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <BookOpen className="mr-2" />
+                        Guia do sistema
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="cursor-pointer"
+                    onSelect={() => iniciar(TOUR_COMPLETO)}
+                >
+                    <Compass className="mr-2" />
+                    Refazer o tour
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

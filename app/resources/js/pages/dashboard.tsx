@@ -81,6 +81,7 @@ export default function Dashboard({
 
                 <section
                     aria-label="Resumo"
+                    data-tour="resumo"
                     className="grid grid-cols-2 gap-4 lg:grid-cols-4"
                 >
                     <Indicador
@@ -110,6 +111,7 @@ export default function Dashboard({
 
                 <section
                     aria-labelledby="fluxo"
+                    data-tour="fluxo"
                     className="flex flex-col gap-3.5"
                 >
                     <h2 id="fluxo" className="text-lg font-semibold">
@@ -151,7 +153,10 @@ export default function Dashboard({
                 </section>
 
                 <section className="grid gap-4 lg:grid-cols-2">
-                    <div className="flex flex-col gap-3 rounded-xl border bg-card p-5">
+                    <div
+                        data-tour="pendencias"
+                        className="flex flex-col gap-3 rounded-xl border bg-card p-5"
+                    >
                         <h2 className="text-base font-semibold">
                             Pendências da produção
                         </h2>

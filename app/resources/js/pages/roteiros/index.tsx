@@ -66,57 +66,66 @@ export default function Roteiros({
                     sobretitulo="5 roteiros por semana · filtro de conformidade do conselho aplicado"
                     titulo="Roteiros da semana"
                 >
-                    {semanas.length > 0 && (
-                        <>
-                            <label
-                                htmlFor="semana"
-                                className="text-sm text-muted-foreground"
-                            >
-                                Semana
-                            </label>
-                            <select
-                                id="semana"
-                                value={semana}
-                                onChange={(e) =>
-                                    router.get(
-                                        index.url({
-                                            query: { semana: e.target.value },
-                                        }),
-                                    )
-                                }
-                                className="h-11 rounded-[10px] border border-input bg-card px-3 text-sm"
-                            >
-                                {semanas.map((s) => (
-                                    <option key={s.valor} value={s.valor}>
-                                        {s.rotulo}
-                                    </option>
-                                ))}
-                            </select>
-                        </>
-                    )}
-                    {briefingCompleto ? (
-                        <Form {...gerar.form()}>
-                            {({ processing }) => (
-                                <Button
-                                    type="submit"
-                                    className="h-11"
-                                    disabled={processing || aguardando}
-                                    title={`Gera os roteiros de ${proximaSemana}`}
+                    <div
+                        data-tour="roteiros-acoes"
+                        className="flex flex-wrap items-center gap-3"
+                    >
+                        {semanas.length > 0 && (
+                            <>
+                                <label
+                                    htmlFor="semana"
+                                    className="text-sm text-muted-foreground"
                                 >
-                                    {processing || aguardando ? (
-                                        <Spinner />
-                                    ) : (
-                                        <Sparkles />
-                                    )}
-                                    Gerar próxima semana
-                                </Button>
-                            )}
-                        </Form>
-                    ) : (
-                        <Button asChild variant="outline" className="h-11">
-                            <Link href={briefing()}>Completar o briefing</Link>
-                        </Button>
-                    )}
+                                    Semana
+                                </label>
+                                <select
+                                    id="semana"
+                                    value={semana}
+                                    onChange={(e) =>
+                                        router.get(
+                                            index.url({
+                                                query: {
+                                                    semana: e.target.value,
+                                                },
+                                            }),
+                                        )
+                                    }
+                                    className="h-11 rounded-[10px] border border-input bg-card px-3 text-sm"
+                                >
+                                    {semanas.map((s) => (
+                                        <option key={s.valor} value={s.valor}>
+                                            {s.rotulo}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
+                        {briefingCompleto ? (
+                            <Form {...gerar.form()}>
+                                {({ processing }) => (
+                                    <Button
+                                        type="submit"
+                                        className="h-11"
+                                        disabled={processing || aguardando}
+                                        title={`Gera os roteiros de ${proximaSemana}`}
+                                    >
+                                        {processing || aguardando ? (
+                                            <Spinner />
+                                        ) : (
+                                            <Sparkles />
+                                        )}
+                                        Gerar próxima semana
+                                    </Button>
+                                )}
+                            </Form>
+                        ) : (
+                            <Button asChild variant="outline" className="h-11">
+                                <Link href={briefing()}>
+                                    Completar o briefing
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
                 </CabecalhoPagina>
 
                 <p
@@ -153,13 +162,19 @@ export default function Roteiros({
 
                 {roteiros.length === 0 ? (
                     !aguardando && (
-                        <p className="text-sm text-muted-foreground">
+                        <p
+                            data-tour="roteiros-conteudo"
+                            className="text-sm text-muted-foreground"
+                        >
                             Nenhum roteiro ainda. Use “Gerar próxima semana”
                             para a IA escrever os roteiros de {proximaSemana}.
                         </p>
                     )
                 ) : (
-                    <div className="overflow-x-auto rounded-xl border bg-card">
+                    <div
+                        data-tour="roteiros-conteudo"
+                        className="overflow-x-auto rounded-xl border bg-card"
+                    >
                         <table className="w-full min-w-[900px] border-collapse text-sm">
                             <thead>
                                 <tr className="text-left text-xs tracking-wide text-muted-foreground uppercase">

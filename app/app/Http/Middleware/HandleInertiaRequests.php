@@ -47,6 +47,8 @@ class HandleInertiaRequests extends Middleware
                 ? Cliente::query()->find($request->user()->cliente_id, ['id', 'nome'])?->only('id', 'nome')
                 : null,
             'status' => fn () => $request->session()->get('status'),
+            // Onboarding: falso até a produção concluir ou dispensar o tour pela primeira vez.
+            'tourConcluido' => fn () => $request->user()?->tour_concluido_em !== null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

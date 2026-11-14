@@ -269,6 +269,7 @@ export default function Personas({
                 {sugestoes.length > 0 && (
                     <section
                         aria-labelledby="sug"
+                        data-tour="personas-sugestoes"
                         className="flex flex-col gap-3.5"
                     >
                         <h2 id="sug" className="text-lg font-semibold">
@@ -285,6 +286,7 @@ export default function Personas({
 
                 <section
                     aria-labelledby="cat"
+                    data-tour="personas-catalogo"
                     className="flex flex-col gap-3.5"
                 >
                     <div className="flex flex-wrap items-center justify-between gap-3">

@@ -85,6 +85,7 @@ function Texto({
 
     return (
         <form
+            data-tour="roteiro-texto"
             className="flex flex-col gap-[18px] rounded-xl border bg-card p-[22px]"
             onSubmit={(e) => {
                 e.preventDefault();
@@ -173,6 +174,7 @@ function CartaoConformidade({
     return (
         <section
             aria-labelledby="conf"
+            data-tour="roteiro-conformidade"
             className="flex flex-col gap-3 rounded-xl border bg-card p-[22px]"
         >
             <div className="flex items-center justify-between gap-3">
@@ -303,6 +305,7 @@ function CartaoPersona({
     return (
         <section
             aria-labelledby="persona"
+            data-tour="roteiro-persona"
             className="flex flex-col gap-3 rounded-xl border bg-card p-5"
         >
             <div className="flex items-center justify-between gap-2">
@@ -488,54 +491,60 @@ export default function RoteiroShow({
         <>
             <Head title={roteiro.titulo} />
             <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8">
-                <SessaoRoteiro
-                    roteiro={roteiro}
-                    atual="roteiro"
-                    acoes={
-                        !descartado && (
-                            <>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="h-11"
-                                    disabled={aguardando}
-                                    onClick={() => setPedindo(true)}
+                <div data-tour="roteiro-cabecalho">
+                    <SessaoRoteiro
+                        roteiro={roteiro}
+                        atual="roteiro"
+                        acoes={
+                            !descartado && (
+                                <div
+                                    data-tour="roteiro-acoes"
+                                    className="flex flex-wrap gap-3"
                                 >
-                                    Pedir nova versão
-                                </Button>
-                                {roteiro.status === 'aprovado' ? (
-                                    <Button asChild className="h-11">
-                                        <Link href={gravacao(roteiro.id)}>
-                                            Ir para gravação
-                                        </Link>
-                                    </Button>
-                                ) : (
-                                    <Form
-                                        {...aprovar.form(roteiro.id)}
-                                        options={{ preserveScroll: true }}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-11"
+                                        disabled={aguardando}
+                                        onClick={() => setPedindo(true)}
                                     >
-                                        {({ processing }) => (
-                                            <Button
-                                                type="submit"
-                                                className="h-11"
-                                                disabled={
-                                                    processing ||
-                                                    roteiro.impedimento !== null
-                                                }
-                                                title={
-                                                    roteiro.impedimento ??
-                                                    undefined
-                                                }
-                                            >
-                                                Aprovar roteiro
-                                            </Button>
-                                        )}
-                                    </Form>
-                                )}
-                            </>
-                        )
-                    }
-                />
+                                        Pedir nova versão
+                                    </Button>
+                                    {roteiro.status === 'aprovado' ? (
+                                        <Button asChild className="h-11">
+                                            <Link href={gravacao(roteiro.id)}>
+                                                Ir para gravação
+                                            </Link>
+                                        </Button>
+                                    ) : (
+                                        <Form
+                                            {...aprovar.form(roteiro.id)}
+                                            options={{ preserveScroll: true }}
+                                        >
+                                            {({ processing }) => (
+                                                <Button
+                                                    type="submit"
+                                                    className="h-11"
+                                                    disabled={
+                                                        processing ||
+                                                        roteiro.impedimento !==
+                                                            null
+                                                    }
+                                                    title={
+                                                        roteiro.impedimento ??
+                                                        undefined
+                                                    }
+                                                >
+                                                    Aprovar roteiro
+                                                </Button>
+                                            )}
+                                        </Form>
+                                    )}
+                                </div>
+                            )
+                        }
+                    />
+                </div>
 
                 {aguardando && (
                     <p

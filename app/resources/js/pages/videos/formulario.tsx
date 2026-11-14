@@ -26,7 +26,11 @@ type Campos = {
     legenda: string | null;
 };
 type Chave = keyof Campos;
-type Sugestao = Campos & { gancho_inicio: number | null; do_roteiro: Chave[] };
+type Sugestao = Campos & {
+    gancho_inicio: number | null;
+    /** Análises antigas podem não trazer a lista; nesse caso nada é marcado como vindo do roteiro. */
+    do_roteiro?: Chave[];
+};
 type Video = {
     id: number;
     nome: string;
@@ -166,7 +170,7 @@ function Conteudo({
     const duracao = trechos.at(-1)?.fim ?? null;
 
     const acoes = editavel && (
-        <>
+        <div data-tour="form-acoes" className="flex flex-wrap gap-3">
             <Button
                 type="button"
                 variant="outline"
@@ -189,7 +193,7 @@ function Conteudo({
                 {form.processing ? <Spinner /> : <Sparkles />}
                 Gerar edição automática
             </Button>
-        </>
+        </div>
     );
 
     return (
@@ -307,6 +311,7 @@ function Conteudo({
                 <div className="flex flex-wrap items-start gap-6">
                     <section
                         aria-label="Vídeo bruto e cortes"
+                        data-tour="form-video"
                         className="flex flex-[1_1_340px] flex-col gap-3.5"
                     >
                         <div className="relative w-full max-w-[340px]">
@@ -425,6 +430,7 @@ function Conteudo({
                     {formulario && (
                         <section
                             aria-label="Sugestões da IA"
+                            data-tour="form-campos"
                             className="flex min-w-0 flex-[999_1_520px] flex-col gap-3"
                         >
                             <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
@@ -469,7 +475,7 @@ function Conteudo({
                                                 >
                                                     {rotulo}
                                                 </span>
-                                                {sugestao?.do_roteiro.includes(
+                                                {sugestao?.do_roteiro?.includes(
                                                     chave,
                                                 ) && (
                                                     <span className="rounded-full bg-[#EEF0F3] px-2 py-0.5 text-[11px] font-semibold text-[#3A414C]">

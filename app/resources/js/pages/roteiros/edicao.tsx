@@ -137,6 +137,7 @@ export default function Edicao({
                     <div className="flex flex-wrap items-start gap-6">
                         <section
                             aria-labelledby="prog"
+                            data-tour="edicao-video"
                             className="flex min-w-0 flex-[999_1_480px] flex-col gap-[18px] rounded-xl border bg-card p-6"
                         >
                             <div className="flex flex-col gap-2">
@@ -181,7 +182,10 @@ export default function Edicao({
                                     />
                                 </div>
                             </div>
-                            <ol className="flex flex-col">
+                            <ol
+                                data-tour="edicao-etapas"
+                                className="flex flex-col"
+                            >
                                 {ETAPAS.map((e, i) => (
                                     <li
                                         key={e.chave}

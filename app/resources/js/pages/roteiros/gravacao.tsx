@@ -254,6 +254,7 @@ export default function Gravacao({
                 <div className="flex flex-wrap items-start gap-6">
                     <section
                         aria-labelledby="gravar"
+                        data-tour="gravacao-roteiro"
                         className="flex flex-[1_1_380px] flex-col gap-4"
                     >
                         <div className="flex flex-col gap-3.5 rounded-xl bg-[#14171C] p-[22px] text-white">
@@ -267,6 +268,7 @@ export default function Gravacao({
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    data-tour="gravacao-teleprompter"
                                     className="h-9 border-[#3A4150] bg-transparent text-white hover:bg-[#2A2F38] hover:text-white"
                                     onClick={() => setTeleprompter(true)}
                                 >
@@ -328,6 +330,7 @@ export default function Gravacao({
 
                     <section
                         aria-labelledby="takes"
+                        data-tour="gravacao-takes"
                         className="flex min-w-0 flex-[999_1_460px] flex-col gap-4"
                     >
                         {aprovado ? (

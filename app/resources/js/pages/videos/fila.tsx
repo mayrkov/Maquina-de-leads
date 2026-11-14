@@ -41,7 +41,16 @@ export default function Fila({
     return (
         <>
             <Head title={titulo} />
-            <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8">
+            <div
+                data-tour={
+                    titulo === 'Aprovação'
+                        ? 'aprovacao-conteudo'
+                        : titulo === 'Edição'
+                          ? 'edicao-conteudo'
+                          : undefined
+                }
+                className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8"
+            >
                 <CabecalhoPagina sobretitulo={sobretitulo} titulo={titulo} />
                 {videos.length === 0 ? (
                     <p className="text-sm text-muted-foreground">

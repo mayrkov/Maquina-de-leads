@@ -174,7 +174,10 @@ export default function KitMarca({
                 )}
 
                 <div className="flex flex-wrap items-start gap-6">
-                    <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-6">
+                    <div
+                        data-tour="kit-form"
+                        className="flex min-w-0 flex-[999_1_520px] flex-col gap-6"
+                    >
                         <section className="flex flex-col gap-5 rounded-xl border bg-card p-6">
                             <h2 className="text-base font-semibold">
                                 Identidade
@@ -435,6 +438,7 @@ export default function KitMarca({
 
                     <aside
                         aria-label="Prévia"
+                        data-tour="kit-previa"
                         className="flex flex-[1_1_300px] flex-col gap-3"
                     >
                         <span className="text-sm font-semibold">

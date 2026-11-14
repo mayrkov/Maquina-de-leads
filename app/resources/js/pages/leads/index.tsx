@@ -43,6 +43,7 @@ function Registrar({
             {...store.form()}
             options={{ preserveScroll: true }}
             onSuccess={aoFechar}
+            data-tour="leads-registrar"
             className="flex flex-col gap-4 rounded-xl border bg-card p-5"
         >
             {({ processing, errors }) => (
@@ -206,7 +207,10 @@ export default function Leads({
     return (
         <>
             <Head title="Leads" />
-            <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8">
+            <div
+                data-tour="leads-conteudo"
+                className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-10 md:py-8"
+            >
                 <CabecalhoPagina
                     sobretitulo="Registro básico · entrega e status manuais no MVP"
                     titulo="Leads"
@@ -214,6 +218,7 @@ export default function Leads({
                     {!registrando && (
                         <Button
                             className="h-11"
+                            data-tour="leads-registrar"
                             onClick={() => setRegistrando(true)}
                         >
                             + Registrar lead
@@ -232,6 +237,7 @@ export default function Leads({
                 <div
                     role="group"
                     aria-label="Filtrar por status"
+                    data-tour="leads-filtros"
                     className="flex flex-wrap items-center gap-2"
                 >
                     {filtros.map(([valor, rotulo]) => (
@@ -266,7 +272,10 @@ export default function Leads({
                 </div>
 
                 {leads.data.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p
+                        data-tour="leads-tabela"
+                        className="text-sm text-muted-foreground"
+                    >
                         Nenhum lead{' '}
                         {filtro.status || filtro.video
                             ? 'com este filtro'
@@ -274,7 +283,10 @@ export default function Leads({
                         .
                     </p>
                 ) : (
-                    <div className="overflow-x-auto rounded-xl border bg-card">
+                    <div
+                        data-tour="leads-tabela"
+                        className="overflow-x-auto rounded-xl border bg-card"
+                    >
                         <table className="w-full min-w-[960px] border-collapse text-sm">
                             <thead>
                                 <tr className="text-left text-xs tracking-wide text-muted-foreground uppercase">

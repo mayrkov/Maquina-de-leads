@@ -98,6 +98,7 @@ export default function Metricas({
 
                 <section
                     aria-label="Totais"
+                    data-tour="metricas-totais"
                     className="grid grid-cols-2 gap-4 lg:grid-cols-4"
                 >
                     {(
@@ -127,6 +128,7 @@ export default function Metricas({
 
                 <section
                     aria-labelledby="porvideo"
+                    data-tour="metricas-tabela"
                     className="flex flex-col gap-3"
                 >
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -291,7 +293,10 @@ export default function Metricas({
                     </p>
                 </section>
 
-                <section className="flex flex-col gap-2 rounded-xl border bg-card p-5">
+                <section
+                    data-tour="metricas-aprendizado"
+                    className="flex flex-col gap-2 rounded-xl border bg-card p-5"
+                >
                     <h2 className="text-base font-semibold">
                         Aprendizado para os próximos roteiros
                     </h2>

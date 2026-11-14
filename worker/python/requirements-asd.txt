@@ -1,0 +1,5 @@
+# Opcional: Light-ASD (python/cuts/asd.py) para saber quem fala quando há mais de uma pessoa no vídeo. Sem estes
+# pacotes o reenquadramento segue a heurística da boca. Instalar no mesmo venv de requirements-cuts.txt.
+# Versões ainda não testadas com o pipeline (escolhidas na data de 2026-11-14): rodar python/cuts/test_cuts.py ao instalar.
+torch==2.15.0
+python_speech_features==0.6

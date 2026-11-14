@@ -1,0 +1,92 @@
+# Piloto num servidor (arquitetura D8): só o Caddy abre portas (80 e 443). Postgres e worker ficam na rede interna.
+# Ainda não testado num servidor: ver "Verificação final" antes de ir ao ar.
+#   cp infra/.env.example infra/.env   # preencher
+#   docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build
+name: maquina-de-leads
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/app.Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: https://${DOMINIO}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_DATABASE: maquina_de_leads
+      DB_USERNAME: maquina_app
+      DB_PASSWORD: ${DB_APP_PASSWORD}
+      DB_WORKER_USERNAME: maquina_worker
+      CACHE_STORE: file
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: "true"
+      MIDIA_ROOT: /midia
+    volumes:
+      - midia:/midia
+      - app_storage:/app/storage
+    depends_on:
+      - postgres
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/worker.Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://maquina_worker:${DB_WORKER_PASSWORD}@postgres:5432/maquina_de_leads
+      MIDIA_ROOT: /midia
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - midia:/midia
+      - worker_render:/app/worker/render_output
+      - worker_models:/app/worker/models
+    # Limite para o render não sufocar o Postgres e o painel (D6). Ajustar ao tamanho do servidor.
+    cpus: 2
+    mem_limit: 4g
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: maquina_de_leads
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+      DB_WORKER_PASSWORD: ${DB_WORKER_PASSWORD}
+    # Medição desde o primeiro dia (D6): consultas lentas no log e pg_stat_statements.
+    command: >
+      postgres -c shared_preload_libraries=pg_stat_statements -c log_min_duration_statement=500
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+
+volumes:
+  caddy_data:
+  caddy_config:
+  midia:
+  app_storage:
+  worker_render:
+  worker_models:
+  postgres_data:

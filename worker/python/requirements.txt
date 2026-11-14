@@ -1,0 +1,5 @@
+# Transcrição (python/cuts/transcribe.py) no venv do projeto (.venv): faster-whisper, modelo "base" em CPU/int8,
+# guardado em models/whisper/ no primeiro uso.
+#   python3 -m venv .venv && .venv/bin/pip install -r python/requirements.txt
+faster-whisper==1.2.1
+av==19.0.2

@@ -1,0 +1,6 @@
+# Reenquadramento, legenda e tela final (python/cuts/render_clip.py, python/edit/end_card.py) no venv .venv-cuts
+# (ou no Python apontado por CUTS_PYTHON).
+#   python3 -m venv .venv-cuts && .venv-cuts/bin/pip install -r python/requirements-cuts.txt
+opencv-python-headless==5.0.0.93
+numpy==2.5.4
+pillow==13.0.0

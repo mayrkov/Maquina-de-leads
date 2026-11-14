@@ -1,106 +1,70 @@
 # AGENTS.md — instruções para o agente que mantém este projeto
 
-Lido automaticamente pelo Antigravity CLI, Gemini CLI, Codex e Claude. Leia inteiro antes de mudar qualquer coisa. Depois leia `README.md` (fonte da verdade do funcionamento, comandos e configuração) e os planos em `planejamento/`.
+Lido automaticamente pelo Codex, Gemini CLI, Antigravity e Claude. Leia inteiro antes de mudar qualquer coisa. Depois leia `README.md` e os requisitos em `planejamento/requisitos/` (fonte da verdade do produto: `analise-de-requisitos.md`, `arquitetura.md`, `pendencias.md`, `verificacao-final.md`) e o registro de decisões e peculiaridades em `planejamento/decisoes.md`.
 
 ## O que é
 
-"Máquina de Shorts": pipeline autônomo que produz Shorts de curiosidades em pt-BR (história, ciência, espaço) e publica no YouTube (e, quando ligado, Instagram) **sem revisão humana**. Produção no PC Windows de casa do dono (Hélio, RTX 3050), disparada pelo Agendador de Tarefas; o Linux serve para desenvolvimento. O dono não é programador profissional: explique decisões em português simples e peça confirmação antes de qualquer coisa que publique, gaste dinheiro ou mexa em contas.
+"Máquina de Leads": sistema que pesquisa temas, gera roteiros, edita os vídeos brutos gravados pelo cliente (no piloto, um médico otorrino) e acompanha os leads que chegam pelo Instagram. Todo conteúdo passa por aprovação humana (RN01). O sistema nunca gera rosto nem voz sintética (RN02) e nunca vende (RN03).
 
-**Custo zero de API.** Em produção a IA roda pelo Antigravity CLI (`agy`) com os créditos do plano: `LLM_PROVIDER=antigravity-cli`, `ANTIGRAVITY_FALLBACK=none`. Modelo por etapa em `llm.models` do `config/pipeline.config.json` (Argon no roteiro, Flash na checagem de fatos e nas imagens). Voz local **Kokoro** (`voice.engine: "kokoro"`, `KOKORO_PYTHON` no `.env`). Os modelos Claude/GPT dentro do `agy` gastam um saldo separado de "AI credits" que acabou no teste: **não use** sem o dono confirmar. A API paga do Gemini (`LLM_PROVIDER=gemini`, Gemini TTS) só como alternativa explícita do dono.
+A base de código veio da Máquina de Shorts. O que não serve ao produto (análise de requisitos, seção 6.2) e o que fica para depois (seção 6.3) foram removidos; o histórico do git guarda os dois para quando forem adaptados.
 
-## Mapa rápido
+## Arquitetura (planejamento/requisitos/arquitetura.md)
 
 | Caminho | O quê |
 |---|---|
-| `src/orchestrator/runPipeline.ts` | orquestra os estágios; `--resume`, `--until`, `--fixture`, novas tentativas de tema |
-| `src/orchestrator/stages/` | 01 tema · 02 roteiro · 02b checagem de fatos · 03 imagens · 04 voz · 05 legendas · 05b memes (`05b-planEdits.ts`, desligado) · 06 render · 07 metadados · 08 publicação |
-| `src/orchestrator/publishers/` | `youtube.ts` em uso, `instagram.ts` pronto e desligado; travas em `gates.ts` e `runner.ts` |
-| `src/orchestrator/lib/` | cliente LLM, ffmpeg, relevância, redação de segredos, trava de arquivo, retenção, hashes de conteúdo |
-| `src/orchestrator/lib/antigravityCli.ts` + `antigravitySession.ts` | chamada isolada ao `agy` e sessão contínua (`ANTIGRAVITY_CLI_SESSION_TURNS`) |
-| `src/orchestrator/lib/secretStore.ts`, `dashboard/server/keys.ts` | chaves de API digitadas no painel: `secrets/api-keys.json` (0600, fora do git), carregadas no início do pipeline sem sobrepor o `.env`; as rotas `/api/keys` são só de escrita e nunca devolvem o valor (teste em `test/dashboard/keys.test.ts`) |
-| `src/orchestrator/lib/beats.ts` | trechos da fala (*beats*): uma busca de imagem por trecho |
-| `src/orchestrator/lib/terminalCards.ts`, `src/remotion/components/Terminal.tsx` | `script.imageSource: "terminal"`: sem imagens; um cartão animado por cena (números conferidos contra o roteiro checado) |
-| `src/orchestrator/lib/illustrate.ts`, `imageProvider.ts`, `quota.ts` | `script.imageSource: "ilustrado"`: uma ilustração 3D por trecho gerada pela ferramenta de imagem do `agy` (arquivo lido da pasta "brain" do agy, conferido antes de copiar). `imageProvider.ts`: interface de provedor plugável (`script.imageProvider`) e reserva configurável (`script.imageFallback`: `nenhum` ou `acervo`, nunca API paga); `quota.ts`: `QuotaExhaustedError` (429/RESOURCE_EXHAUSTED) que para o estágio 03 e a execução sem nova tentativa de tema |
-| `src/orchestrator/lib/verdictLog.ts` + `scripts/export_verdicts_dataset.ts` | grava `footage_verdicts.jsonl` e exporta o dataset do juiz de imagem local (LlamaFactory) |
-| `src/orchestrator/cuts/`, `python/cuts/`, `scripts/cuts.ts` | cortes (Onda 4): YouTube ou TikTok, download, transcrição, seleção, conferência de sentido, cortes secos (`jumpcut.ts`), humor (`humor.ts`), compilações de vídeos curtos (`compilation.ts`), recorte vertical; **não publica** |
-| `src/orchestrator/viral/`, `scripts/collect_shorts_stats.ts`, `scripts/build_viral_dataset.ts`, `python/viral/` | dados públicos de Shorts de outros canais (título + views, sem baixar vídeo). Laya treinado só com o título não previu viral (AUC 0,48 em 22/10); os títulos virais viram exemplos de ESTILO nos prompts de título (`viral/titleExamples.ts`: roteiro dos Shorts, seleção de cortes e compilações). Segunda tentativa (23/10): pergunta "vai flopar?" (`--target fraco`) e gancho = duração + primeiras falas da legenda automática (`--hooks`, sem baixar vídeo); só entra na máquina com AUC ≥ 0,6 e acima do `durationOnly`. Dados em `data/datasets/viral/`, fora do git |
-| `python/edits/retime_bass.py`, `dashboard/server/music.ts` | edits: encaixa os cortes de um vídeo nos graves de uma música (lista de músicas em Configurações → Músicas, `data/music/`, fora do git); **não publica** |
-| `scripts/memes.ts`, `assets/memes/` | biblioteca de memes e sons (Onda 2); só `inventory.json` é versionado |
-| `src/remotion/` | composição do vídeo (tomadas, capa, legendas, movimento, camada de memes) |
-| `src/shared/settings.ts` | esquemas e padrões das configurações |
-| `python/tts/` + `src/shared/voiceEngines.ts` | motores de voz plugáveis (registro em `04-synthesizeVoice.ts`, `ENGINE_FACTORIES`): Kokoro (padrão), Chatterbox (venv próprio, voz de referência só com consentimento), ElevenLabs (chave do usuário, nunca padrão; `lib/elevenLabsTts.ts`), Gemini; corte de pausas; alinhamento (faster-whisper `base`, cache em `models/`); edge-tts legado. Letras por segundo por motor em `voiceEngines.ts` (`npm run voice-speed` remede) |
-| `vendor/openmontage_adapter/fetch_footage.py` | busca de imagens com filtro de licença; código AGPL — **só via subprocesso**, nunca importar em `src/` ou `python/` |
-| `dashboard/` | painel local React (`npm run dashboard`, http://localhost:5180) com a aba Configurações |
-| `scheduler/` | scripts do Agendador do Windows |
-| `config/pipeline.config.json`, `config/topics.seed.json`, `config/cuts.example.json` | configuração (o `config/cuts.json` real fica fora do git) |
-| `docs/` | **público** no GitHub Pages. Nunca colocar nada privado aqui |
-| `planejamento/` | planos dos marcos 4 e 5 |
+| `app/` | Sistema em Laravel 13 + Inertia + React (D1, D2): login (Fortify, sem cadastro público), painel, dados. Domínios em `app/Domains/<Domínio>/` (Models, Actions, Controllers, Requests); fila do worker em `app/Worker/` |
+| `app/app/Worker/FilaMidia.php` | lado Laravel da fila `tarefas_midia` (D4): `enfileirar` (lista fechada de campos por tipo, nunca dado de saúde), `devolverAbandonadas`, `processarResultados`, `limparProcessadas` |
+| `app/app/Console/Commands/ProcessarTarefasMidia.php` | `php artisan tarefas:processar`, agendado a cada minuto (`routes/console.php`) |
+| `app/app/Domains/Videos/` | upload avulso (RF16), análise e formulário de edição (RF51, RF52), aprovação da produção e confirmação do médico por link (RF26, RF27); telas em `resources/js/pages/videos/` e `confirmacao/` |
+| `app/app/Domains/Publicacao/`, `Leads/` | área "Publicação e resultados" do canva: publicação manual (RF29), métricas digitadas (RF41, RF42) e leads com consentimento (RF38 a RF40) |
+| `app/app/Domains/Clientes/`, `Personas/`, `Marca/`, `Painel/` | área "Acesso e configuração" do canva: briefing (RF01, RF03, RF04), personas sugeridas pela IA e decididas pela produção (RF48 a RF50), kit de marca (RF15) aplicado na edição, painel da semana |
+| `app/app/Domains/Roteiros/` | área "Roteiros e gravação" do canva: roteiros da semana (RF05, RF08 a RF13, RF25, RF27), takes na sessão do roteiro (RF16) e progresso da edição. Regras do conselho em `app/config/conformidade.php` (provisórias) |
+| `worker/src/worker/jobs/` | `analisar_video` (transcrição e formulário de edição, tarefa `formularioEdicao`), `editar_video` (segue o formulário: trechos cortados, destaques e a transcrição da análise; aplica o kit: cor e estilo da legenda, logo como marca, tela final, vinheta; grava a etapa em `tarefas_midia.etapa`), `sugerir_personas` (IA, tarefa `personas` do `llm.tasks`) e `roteiros.ts` (`gerar_roteiros`, `refazer_roteiro`, `checar_conformidade`: tarefas `roteiro` e `conformidade`, com busca na web) |
+| `worker/` | worker de mídia e IA em Node + Python (D3), sem porta aberta. `src/worker/main.ts` escuta a fila (LISTEN + SKIP LOCKED, sinal de vida); `src/worker/jobs/` tem uma função por tipo de tarefa |
+| `worker/src/orchestrator/edit/` | edição do vídeo bruto: transcrição, corte de pausas, gaguejo e repetição (`disfluency.ts`), 9:16 com legenda e marca, tela final com a palavra-chave (`endCard.ts`); retomada por `runId` (RF46) |
+| `worker/src/orchestrator/cuts/`, `worker/python/cuts/` | transcrição (faster-whisper), corte seco (`jumpcut.ts`), reenquadramento e legenda (`render.ts` + `render_clip.py`, OpenCV) |
+| `worker/src/orchestrator/lib/` | cliente de IA plugável por tarefa (`llmClient.ts`, `llmTasks.ts`), busca na web, ffmpeg do Remotion, redação de segredos, ambiente mínimo dos processos filhos, trava de arquivo |
+| `worker/src/shared/settings.ts` | esquema de `worker/config/pipeline.config.json`: IA por tarefa (`roteiro`, `conformidade`, `formularioEdicao`, `legendaPost`), busca na web, marca d'água |
+| `infra/` | piloto num servidor (D8): `docker-compose.yml` (caddy, app, worker, postgres), Dockerfiles, `Caddyfile`, `postgres/init.sh` (papéis `maquina_app` e `maquina_worker`) |
+| `planejamento/requisitos/` | requisitos, arquitetura, pendências e verificação final (cópia da pasta de planejamento do produto) |
+| `docs/` | **público** no GitHub Pages (modelos de privacidade e termos herdados). Nunca colocar nada privado aqui |
+
+`packages/video-composition/` (D7) ainda não existe: nasce com o kit de marca (RF15), quando houver composição Remotion compartilhada entre a prévia do painel e o render. Hoje o render é o do OpenCV (`render_clip.py`) e o Remotion só fornece o ffmpeg.
 
 ## Regras inegociáveis
 
-1. **Segredos:** nunca imprima, registre em log nem commite `.env`, `secrets/` (tokens OAuth, client secret) ou chaves de API. Antes de todo commit, rode a varredura e **bloqueie** se acusar algo:
+1. **Segredos:** nunca imprima, registre em log nem commite `.env` (`app/.env`, `worker/.env`, `infra/.env`), `secrets/` ou chaves de API. Antes de todo commit, rode a varredura e **bloqueie** se acusar algo:
    ```bash
    git diff --cached --name-only -z | xargs -0 grep -lE 'AIza[0-9A-Za-z_-]{30,}|sk-ant-[0-9A-Za-z_-]{20,}|GOCSPX-|IGAA[0-9A-Za-z_-]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY'
    ```
-   Os testes têm valores falsos de propósito (`AIzaFAKE…`, `GOCSPX-FAKE…`, `IGAAfake…`); confirme que é falso antes de seguir. Nunca commitar `render_output/`, `logs/`, `data/history.json`, `models/`, vídeos ou áudios.
-2. **`agy` isolado:** sempre com `--sandbox`, pasta temporária só com as imagens da chamada e ambiente sem chaves. **Nunca** `--dangerously-skip-permissions` nem regra que libere comandos: ele lê imagens baixadas da internet.
-3. **Publicação:** só o dono liga `upload.enabled`, `instagram.enabled` ou registra o agendador. Nunca publique, nem como teste, sem confirmação explícita dele naquela conversa.
-4. **Não enfraqueça as travas:** checagem de fatos, trava de qualidade (≥60% das cenas com imagem aprovada), filtro de licença (domínio público, CC0, CC BY, Pexels/Pixabay; NASA só com crédito da NASA), créditos CC BY com autor + link + "(recortado e editado)", hashes que prendem aprovações ao conteúdo, diário anti-duplicata, limite diário, trava de arquivo. **Cortes** só de canais ligados pelo dono (`enabled: true`) e fora de `blocked` em `config/cuts.json`; nunca mudar o sentido da fala nem desmoralizar ninguém (a conferência `verifyPicks` descarta o trecho); canal que reclamar vai para `blocked`. **Memes** só com licença da lista permitida (ver README). Se uma trava atrapalhar, explique ao dono em vez de contorná-la.
-5. **Testes antes de commit** (tudo verde): `npx tsc -p tsconfig.json --noEmit`, `npx vitest run`, `cd dashboard && npm run typecheck`, e com o Python do projeto `-m unittest discover -s python/tts -p "test_*.py"`, `-m unittest discover -s python/cuts -p "test_*.py"` e `-m unittest discover -s python/viral -p "test_*.py"`.
-6. **Licença:** o projeto é `MIT OR Apache-2.0` (LICENSE-MIT, LICENSE-APACHE), exceto `vendor/openmontage_adapter/`, que é AGPL-3.0. Todo arquivo novo precisa ser compatível com MIT OR Apache-2.0; AGPL só nessa pasta, e nada de `src/` ou `python/` importa dela. Código de terceiros só com licença permissiva compatível, com o aviso mantido e o crédito no `NOTICE`; nunca copiar ativos sem licença nem marcas de outros projetos. Não escreva em lugar nenhum que a licença foi aprovada por advogado: ainda não foi.
+   Os testes têm valores falsos de propósito (`AIzaFAKE…`); confirme que é falso antes de seguir. Nunca commitar `worker/render_output/`, `worker/logs/`, `worker/models/`, `app/storage/app/midia/`, vídeos ou áudios.
+2. **Dado de saúde:** nunca no payload de `tarefas_midia`, em log ou na auditoria. O worker tem usuário de banco próprio, só com SELECT e UPDATE em `tarefas_midia`.
+3. **Isolamento entre clientes (RNF02):** toda consulta filtra pelo cliente do usuário (`Video::doCliente($user)`); registro de outro cliente responde 404. Esconder botão não conta: a regra vale no servidor, com teste.
+4. **Aprovação e publicação:** nada vai ao ar sem a produção aprovar e o médico confirmar. No MVP a produção publica à mão; o sistema não publica.
+5. **Testes antes de commit** (tudo verde):
+   - `cd app && php artisan test` (usa o Postgres `maquina_de_leads_testing` e precisa do manifesto do Vite, `npm run build`) e `npm run types:check`;
+   - `npm run lint && npm test` na raiz (worker). Com `WORKER_TEST_DATABASE_URL=postgres://postgres:lerd@127.0.0.1:5432/maquina_de_leads_testing` roda também o teste da fila no Postgres;
+   - `worker/.venv-cuts/bin/python -m unittest discover -s worker/python/cuts -p "test_*.py"`.
+6. **Licença:** o projeto é `MIT OR Apache-2.0`. Código de terceiros só com licença permissiva compatível, com o aviso mantido e o crédito no `NOTICE`. Não escreva que a licença foi aprovada por advogado: ainda não foi.
 7. **Faça o que foi pedido, nada além.** Prefira editar arquivos existentes. Leia antes de editar. Commits em português, descrevendo o porquê.
-
-## Coordenação entre agentes
-
-O dono usa várias sessões de IA no mesmo repositório (PC de casa e PC Linux).
-
-- Antigravity trabalha em branch próprio (`antigravity/*`). Ninguém commita direto no `main` sem revisão.
-- Nunca mude `upload.enabled`, `instagram.enabled`, o agendador, contas ou `secrets/` (já aconteceu do Antigravity ligar o Instagram sozinho).
-- O `config/pipeline.config.json` do PC de produção tem ajustes locais não commitados: não sobrescreva.
-- `git pull` só entre vídeos, nunca no meio de uma execução.
+8. **Documente na hora** em `planejamento/decisoes.md`, com data e motivo:
+   - toda decisão que os requisitos não cobrem;
+   - todo desvio dos requisitos;
+   - toda peculiaridade do ambiente (algo que precisa rodar à mão, versão diferente, ferramenta com limitação).
 
 ## Comandos
 
 ```bash
-npm run pipeline                                   # gera (e publica, se ligado) um vídeo
-npm run pipeline -- --until 06-renderVideo         # gera sem publicar
-npm run pipeline -- --resume <runId>               # retoma uma execução
-npm run stage -- <estágio> --run <runId>           # refaz um estágio
-npm run dashboard                                  # painel em http://localhost:5180
-npm run cuts -- --scan                             # cortes dos canais autorizados (não publica)
-npm run memes -- list                              # biblioteca de memes (check, demo, add-*)
-npx tsx scripts/export_verdicts_dataset.ts --out data/datasets/vision_judge --min-runs 1
-npm run auth:youtube / npm run auth:instagram      # logins (uma vez)
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scheduler\status.ps1
+cd app && php artisan migrate && php artisan db:seed   # banco local (usuário producao@example.com, senha "password")
+cd app && npm run build                                # front (em desenvolvimento, o worker "vite" do lerd)
+cd app && php artisan tarefas:processar                # o que o agendador faz a cada minuto
+npm run worker                                         # worker: consome tarefas_midia (worker/.env)
+npm run edit -- --video bruto.mp4 --keyword OUVIDO     # edita um vídeo pela linha de comando, sem fila
 ```
 
-Saída do pipeline e dos cortes: `0` ok, `1` erro, `3` nada publicável/nada a fazer (não é falha), `4` (só o pipeline) cota de imagens do `agy` esgotada: parada limpa, sem refazer roteiro nem trocar de tema (`context.json` guarda `quota`; o loop para). `scripts/test_agy_relevance.ts` usa a API paga do Gemini: só com OK do dono.
+## Ambiente local (lerd)
 
-## Ambiente
-
-- Produção: Windows de casa (RTX 3050). Desenvolvimento: Linux. O agendador é só do Windows.
-- **Nada é baixado no Linux** (vídeos, modelos, pesos, mídia de teste): downloads, transcrições e renders de teste rodam no PC de casa. Se algo for baixado aqui por engano, apague depois.
-- Python do projeto: `.venv\Scripts\python.exe` no Windows, `.venv/bin/python` no Linux. Kokoro em venv separado (`KOKORO_PYTHON`); cortes em `.venv-cuts` (`CUTS_PYTHON`).
-- `yt-dlp` precisa estar atualizado (versão velha leva 403 do YouTube).
-- O ffmpeg é o do Remotion, versão reduzida: sem `hstack`, `fps`, `setsar`, `silenceremove`.
-- Windows: Git Bash converte argumentos que começam com `/` (use `MSYS_NO_PATHCONV=1`); `tsx watch` trava com a entrada aberta, em processo sem terminal use `npm run dev < NUL` dentro de `dashboard/`.
-
-## Estado em 2026-10-22
-
-- Loop de teste rodando no PC de casa **sem publicar**: `upload.enabled: false`, tarefa do agendador removida. Canal autorizado: "C9hesky ft" (`YOUTUBE_CHANNEL_ID` no `.env`).
-- Planejamento vivo: ClickUp, lista **"Máquina de Shorts"**, e `planejamento/`.
-- **Pendências:**
-  1. Habilitar Serve/HTTPS do Tailscale na conta do dono (painel remoto).
-  2. Cortes: trava trocada em 22/10 (canal ligado + bloqueio; link opcional). Falta o dono ligar o ACF em casa e a transcrição usar a GPU (`CUTS_WHISPER_DEVICE=cuda` no `.env` de casa).
-  3. Instalar `@remotion/lottie` — só com OK do dono.
-  4. Feito em 22/10: estágio 07 dos cortes (`src/orchestrator/cuts/metadata.ts`, crédito + link do original sempre na descrição) e cortes no loop (`-CutsEveryHours`). Publicar cortes continua decisão do dono.
-  5. Feito em 22/10: Kokoro medido em 13,8 letras/s (13 execuções, narração 58–71 s), `LETTERS_PER_SECOND = 14`. Remedir se trocar de voz ou velocidade.
-  6. Configurar o app na Meta com conta dedicada (passo a passo no README).
-  7. Decisão do dono sobre o TikTok (`planejamento/marco-4-tiktok-instagram.md`).
-  8. Marco 5: 15 contas independentes (`planejamento/marco-5-multicontas-e-antigravity.md`).
-  9. Treinar o juiz de imagem local com `footage_verdicts.jsonl` (LlamaFactory).
-  10. Amostra de voz do painel (`dashboard/server/voices.ts`) ainda usa o edge-tts; trocar por Kokoro/Gemini.
-
-## Pasta `.claude/`
-
-Agentes e configuração do Claude Code para desenvolvimento (QA, DevOps, scripting, especialistas de marketing em vídeo curto). Não afetam a execução; `.claude/agents/*.md` serve de referência para auditorias de conteúdo.
+- O Laravel roda no lerd em https://maquina-de-leads.test (PHP 8.5, Postgres 16 em `lerd-postgres`). O agendador (`tarefas:processar`) é o worker `schedule` do lerd (`lerd worker start schedule`, em `app/`). O worker de mídia não roda no lerd: `npm run worker` na raiz.
+- O `node_modules` de `app/` foi instalado pelo lerd (Alpine/musl). Para buildar no host, instale o binário glibc sem salvar: `npm install --no-save @voidzero-dev/vite-plus-linux-x64-gnu@<mesma versão do musl>`.
+- O worker roda no host: `worker/.venv` (faster-whisper) e `worker/.venv-cuts` (OpenCV, numpy, Pillow). `worker/.env` aponta `MIDIA_ROOT` para `app/storage/app/midia` e `DATABASE_URL` para o papel `maquina_worker`.
+- O ffmpeg é o do Remotion, versão reduzida: sem `hstack`, `fps`, `pad`, `setsar`, `silenceremove`.

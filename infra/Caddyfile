@@ -1,0 +1,10 @@
+# HTTPS com certificado automático (D8). HTTP redireciona para HTTPS; HSTS ligado.
+{$DOMINIO} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	reverse_proxy app:8080
+	request_body {
+		# Upload do vídeo bruto (MIDIA_UPLOAD_MAX_MB, padrão 2048)
+		max_size 2GB
+	}
+}
